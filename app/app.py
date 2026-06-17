@@ -4,18 +4,29 @@ ISL to Kannada Translator
 Application Entry Point
 """
 
-from utils.logger import log
+from app.menu import show_main_menu
 
 
-def main():
-    print("=" * 40)
-    print(" ISL to Kannada Translator")
-    print("=" * 40)
+def main_app():
+    """Main application launcher."""
 
-    log("Starting ISL to Kannada Translator")
-    log("Application module initialized.")
-    log("Waiting for module integration...")
+    while True:
+        choice = show_main_menu()
+
+        if choice == "1":
+            print("\nStarting translation...\n")
+
+            # Import only when the user starts translation
+            import main
+            main.main()
+
+        elif choice == "2":
+            print("\nGoodbye!")
+            break
+
+        else:
+            print("\nInvalid choice. Please try again.\n")
 
 
 if __name__ == "__main__":
-    main()
+    main_app()
