@@ -1,8 +1,8 @@
 import streamlit as st
 
-# -----------------------------------------------------------------------------
+# =============================================================================
 # Page Configuration
-# -----------------------------------------------------------------------------
+# =============================================================================
 
 st.set_page_config(
     page_title="ISL to Kannada Translator",
@@ -10,9 +10,9 @@ st.set_page_config(
     layout="wide"
 )
 
-# -----------------------------------------------------------------------------
+# =============================================================================
 # Sidebar Navigation
-# -----------------------------------------------------------------------------
+# =============================================================================
 
 page = st.sidebar.radio(
     "Navigation",
@@ -31,23 +31,29 @@ page = st.sidebar.radio(
 
 if page == "🏠 Home":
 
-    st.title("🤟 ISL → Kannada Translator")
+    header_left, header_right = st.columns([4, 1])
 
-    st.markdown(
-        """
-        Welcome to the **ISL → Kannada Translation System**.
+    with header_left:
+        st.title("🤟 ISL → Kannada Translator")
+        st.caption("Real-Time Indian Sign Language Recognition and Kannada Translation")
 
-        This application will:
+    with header_right:
+        st.markdown("### Status")
+        st.success("🟢 Ready")
 
-        - 📷 Capture live webcam input
-        - ✋ Recognize Indian Sign Language gestures
-        - 🔤 Translate gestures into Kannada
-        - 📈 Display prediction confidence
-        - 📊 Evaluate model performance
-        """
-    )
+    st.markdown("""
+    Welcome to the **ISL → Kannada Translation System**.
 
-    st.markdown("---")
+    This application will:
+
+    - 📷 Capture live webcam input
+    - ✋ Recognize Indian Sign Language gestures
+    - 🔤 Translate gestures into Kannada
+    - 📈 Display prediction confidence
+    - 📊 Evaluate model performance
+    """)
+
+    st.divider()
 
     col1, col2 = st.columns(2)
 
@@ -73,60 +79,97 @@ if page == "🏠 Home":
 # LIVE TRANSLATION PAGE
 # =============================================================================
 
+# =============================================================================
+# LIVE TRANSLATION PAGE
+# =============================================================================
+
 elif page == "🤟 Live Translation":
 
     st.title("🤟 Live Translation")
+    st.caption("Real-time ISL gesture recognition and Kannada translation")
 
-    st.markdown("---")
+    st.divider()
 
     left, right = st.columns([2, 1])
 
+    # ============================================================
+    # Camera
+    # ============================================================
+
     with left:
 
-        st.subheader("📷 Live Camera Feed")
+        st.subheader("📷 Live Camera")
 
-        camera_placeholder = st.empty()
+        camera_placeholder = st.container(height=450)
 
-        camera_placeholder.info(
-            "Live webcam feed will appear here."
-        )
+        with camera_placeholder:
+            st.info("Camera feed will appear here.")
+
+    # ============================================================
+    # Prediction Panel
+    # ============================================================
 
     with right:
 
         st.subheader("Prediction")
 
-        detected_sign = st.empty()
-        kannada_text = st.empty()
-        confidence = st.empty()
-        fps = st.empty()
-
-        detected_sign.metric(
-            "Detected Sign",
-            "--"
+        st.metric(
+            label="Detected Sign",
+            value="Waiting..."
         )
 
-        kannada_text.metric(
-            "Kannada",
-            "--"
+        st.metric(
+            label="Kannada",
+            value="Waiting..."
         )
 
-        confidence.metric(
-            "Confidence",
-            "0%"
+        st.metric(
+            label="Confidence",
+            value="0%"
         )
 
-        fps.metric(
-            "FPS",
-            "0"
+        st.metric(
+            label="FPS",
+            value="0"
         )
 
-    st.markdown("---")
+    st.divider()
+
+    # ============================================================
+    # Camera Controls
+    # ============================================================
+
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.button(
+            "▶ Start Camera",
+            use_container_width=True
+        )
+
+    with col2:
+        st.button(
+            "■ Stop Camera",
+            use_container_width=True
+        )
+
+    with col3:
+        st.button(
+            "🗑 Clear History",
+            use_container_width=True
+        )
+
+    st.divider()
+
+    # ============================================================
+    # Prediction History
+    # ============================================================
 
     st.subheader("Prediction History")
 
-    history = st.empty()
-
-    history.info("No predictions yet.")
+    st.info(
+        "No predictions yet.\n\nStart the camera to begin recognition."
+    )
 
 # =============================================================================
 # EVALUATION PAGE
@@ -146,22 +189,20 @@ elif page == "⚙️ Settings":
 
     st.title("⚙️ Settings")
 
-    st.write("Camera Settings")
-
-    camera_index = st.number_input(
+    st.number_input(
         "Camera Index",
         min_value=0,
         value=0
     )
 
-    confidence_threshold = st.slider(
+    st.slider(
         "Confidence Threshold",
         min_value=0.0,
         max_value=1.0,
         value=0.28
     )
 
-    st.success("Settings will be connected to the application later.")
+    st.success("Settings will be connected later.")
 
 # =============================================================================
 # ABOUT PAGE
@@ -171,25 +212,23 @@ elif page == "ℹ️ About":
 
     st.title("ℹ️ About")
 
-    st.markdown(
-        """
-        ## ISL → Kannada Translator
+    st.markdown("""
+    ## ISL → Kannada Translator
 
-        This project aims to translate **Indian Sign Language (ISL)** into
-        **Kannada** using Computer Vision and Machine Learning.
+    This project translates **Indian Sign Language (ISL)** into
+    **Kannada** using Computer Vision and Machine Learning.
 
-        ### Technology Stack
+    ### Technology Stack
 
-        - Python
-        - OpenCV
-        - MediaPipe
-        - Scikit-Learn
-        - Streamlit
+    - Python
+    - OpenCV
+    - MediaPipe
+    - Scikit-Learn
+    - Streamlit
 
-        ### Team
+    ### Team Responsibilities
 
-        - AI Model Development
-        - Translation Pipeline
-        - Software Application & Frontend
-        """
-    )
+    - AI Model Development
+    - Translation Pipeline
+    - Frontend & Application Development
+    """)
