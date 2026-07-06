@@ -13,3 +13,9 @@ myenv/
 
 # OS
 .DS_Store
+
+# Large datasets and video files
+video_data/
+video_dataset/
+video_model/
+Video_word_context/
