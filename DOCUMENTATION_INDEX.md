@@ -22,6 +22,10 @@
 ### ✅ I want to verify everything works
 → Read: [TESTING_GUIDE.md](TESTING_GUIDE.md) (40 min read)
 
+### 📹 I want to understand the Video Recognition pipeline
+→ Read: [README.md#video-pipeline-workflows](README.md#video-pipeline-workflows) (10 min read)
+→ Read: [integrity_report.md](integrity_report.md) (5 min read)
+
 ### 🏗️ I want to understand the codebase
 → Read: [CODE_EXPLANATION.txt](CODE_EXPLANATION.txt) (25 min read)
 

@@ -17,5 +17,8 @@ myenv/
 # Large local assets for the video pipeline
 video_data/
 video_dataset/
-video_model/
+video_model/landmarks/
+video_model/runs/
+video_model/models/*.pth
+video_model/models/*.npy
 Video_word_context/

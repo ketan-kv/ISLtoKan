@@ -1,17 +1,14 @@
 # Sign2Kannada
 
-Sign2Kannada is a hand-sign recognition project that extracts hand landmarks from images or webcam frames, trains a lightweight classifier on those landmarks, and shows real-time predictions with Kannada text output.
+Sign2Kannada is a sign-recognition project that has two independent pipelines:
+1. **Image Recognition Mode**: Extracts hand landmarks from images or webcam frames, trains a lightweight Random Forest classifier on those landmarks, and shows real-time predictions for digits (0-9) with Kannada text output.
+2. **Video Recognition Mode**: Preprocesses video datasets (WLASL) using MediaPipe Holistic Pose, Hands, and Face tracking to extract 345-dimensional coordinate sequences. Trains a PyTorch sequence LSTM/Transformer classifier for word predictions, and runs real-time camera inference with confidence smoothing, prediction stability tracking, and skeletal overlays.
 
-## What it does
+---
 
-- Extracts 21 hand landmarks per frame with MediaPipe.
-- Builds a CSV dataset from images under `data/dataset/<label>/`.
-- Trains a `KNeighborsClassifier` on landmark features.
-- Runs live webcam inference with confidence tracking and smoothing.
-- Renders Kannada output using a bundled Kannada font when available.
+## 🏗️ Project Layout
 
-## Project layout
-
+### 1. Image Digit recognition (Image Mode)
 - `extractor.py` - hand landmark extraction and drawing utilities.
 - `preprocess.py` - extracts landmarks from the image dataset into `data/landmarks.csv`.
 - `combine_landmarks.py` - combines dataset variants into a single CSV.
@@ -22,83 +19,71 @@ Sign2Kannada is a hand-sign recognition project that extracts hand landmarks fro
 - `translator.py` - digit-to-Kannada mapping.
 - `config.py` - shared paths, thresholds, and colors.
 
-## Requirements
+### 2. Word Sequence recognition (Video Mode)
+Located under `video_model/`:
+- `video_model/dataset/organizer.py` - parses metadata and organizes videos by class gloss.
+- `video_model/preprocessing/video_extractor.py` - MediaPipe Holistic Pose + Hands + Face landmarker and overlay drawing utilities.
+- `video_model/preprocessing/generator.py` - converts variable length videos into `.npy` landmark sequences of shape `(seq_len, 345)`.
+- `video_model/preprocessing/label_generator.py` - indexes sequences into `labels.csv` and `vocabulary.json`.
+- `video_model/models/sequence_model.py` - modular sequence model architectures (LSTM & Transformer Encoder).
+- `video_model/training/train.py` - unbuffered, RAM-cached training script with sequence augmentations (frame drop, noise, translations, scaling, Z-axis roll rotations).
+- `video_model/inference/inference_pipeline.py` - sliding window prediction, smoothing, and stability tracking.
+- `video_model/utils/visualizer.py` - debug visualization video exporter.
 
-Install the Python dependencies listed in `requirements.txt`.
+---
 
-## Setup
+## ⚙️ Setup and Requirements
 
-1. Create and activate your virtual environment.
-2. Install dependencies:
-
+Install Python dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
-3. Make sure your dataset is present under `data/dataset/` using numeric label folders such as `0`, `1`, `2`, and so on.
+Large video assets (`video_data/`, `video_dataset/`, `video_model/`, `Video_word_context/`) are local-only and ignored by git to keep checkout times under 30 seconds. Point your raw video source to `C:\Users\Dayananda Shetty\Downloads\videos` or create a junction link to let the organizer find it.
 
-## Large Local Assets
+---
 
-The video pipeline assets under `video_data/`, `video_dataset/`, `video_model/`, and `Video_word_context/` are kept local so the repository stays easy to clone on another PC.
-Copy those folders separately if you need the full video workflow on a new machine.
+## 🛠️ Video Pipeline Workflows
 
-## Training workflow
-
-### 1. Extract landmarks
-
+### 1. Organize Dataset
 ```bash
-python preprocess.py
+python video_model/dataset/organizer.py
 ```
+Organizes raw videos into class directories and generates `integrity_report.md`.
 
-This creates `data/landmarks.csv` from the source images.
-
-### 2. Optionally combine or mirror data
-
-If you are using the mirrored or combined dataset pipeline, run the matching helper scripts before training.
-
-### 3. Train the model
-
+### 2. Extract Skeletal Landmark Sequences
 ```bash
-python train.py
+python video_model/preprocessing/generator.py
 ```
+Extracts Pose, Hands, and Face coordinates. Normalized sequences are saved under `video_model/landmarks/`.
 
-This trains the classifier and saves the model to `model.pkl`.
+### 3. Generate Label Indexing
+```bash
+python video_model/preprocessing/label_generator.py
+```
+Generates dataset mapping files `labels.csv` and `vocabulary.json`.
 
-### 4. Run live inference
+### 4. Train Sequence Classifier
+```bash
+python video_model/training/train.py --encoder lstm --epochs 30 --batch_size 32
+```
+Trains the PyTorch model with RAM-cached dataset optimization and sequence data augmentations. Saved weights are placed in `video_model/models/best_model.pth`.
 
+### 5. Run Live Inference
 ```bash
 python main.py
 ```
+* **'M' key**: Toggle between Image Digits mode and Video Continuous Word mode.
+* **'P' key**: Toggle Pose skeletal overlay (ON/OFF).
+* **'H' key**: Toggle Hands skeletal overlay (ON/OFF).
+* **'F' key**: Toggle Face mesh overlay (ON/OFF).
+* **'Q' key**: Quit.
 
-Press `Q` in the webcam window to quit.
+---
 
-## Data format
+## 🌐 Notes
 
-The landmark CSV uses one label column followed by 63 landmark values:
+- Digit predictions are mapped to Kannada inside `translator.py`.
+- Word translations are loaded dynamically using the lookup map in `main.py`.
+- Visual inspections of tracking can be done using the sample exporter script `python video_model/utils/visualizer.py`.
 
-- `label`
-- `x0, y0, z0`
-- `x1, y1, z1`
-- ...
-- `x20, y20, z20`
-
-## Kannada output
-
-Digit predictions are translated using `translator.py`:
-
-- `0` -> `ಸೊನ್ನೆ`
-- `1` -> `ಒಂದು`
-- `2` -> `ಎರಡು`
-- `3` -> `ಮೂರು`
-- `4` -> `ನಾಲ್ಕು`
-- `5` -> `ಐದು`
-- `6` -> `ಆರು`
-- `7` -> `ಏಳು`
-- `8` -> `ಎಂಟು`
-- `9` -> `ಒಂಬತ್ತು`
-
-## Notes
-
-- A valid Kannada TTF font is expected under `assets/fonts/` for best text rendering.
-- The model needs at least two gesture classes to train properly.
-- If you only train on a single label, predictions will appear stuck to that class.
